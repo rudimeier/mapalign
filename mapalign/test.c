@@ -111,6 +111,17 @@ end:
 	return n;
 }
 
+int mtx_column_sum(double *L, int n, double *d)
+{
+	int i, j;
+	for( i = 0; i < n; i++ ) {
+		d[i] = 0.0;
+		for( j = 0; j < n; j++ ) {
+			d[i] += L[(size_t)i * n + j];
+		}
+	}
+}
+
 static void print_matrix( int m, int n, double* a )
 {
 	int i, j;
@@ -143,4 +154,9 @@ int main(int argc, char** argv)
 
 	read_csv( infile, L, n );
 	print_matrix(n, n, L);
+	printf("\n");
+
+	double *d = malloc(sizeof(double) * n);
+	mtx_column_sum(L, n, d);
+	print_matrix(1, n, d);
 }
