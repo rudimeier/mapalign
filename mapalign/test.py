@@ -1,5 +1,4 @@
 import numpy as np
-import sklearn
 import embed
 import sys
 
@@ -7,12 +6,9 @@ import sys
 def random_matrix(n):
     tmp = np.random.randint(0,100, size=(n, n))
     for i in range(0, n):
-        for j in range(0, n):
-            if i < j:
-                tmp[i,j] = tmp[j,i]
+        for j in range(0, i):
+            tmp[i,j] = tmp[j,i]
     return tmp
-
-
 
 n = int(sys.argv[1])
 
