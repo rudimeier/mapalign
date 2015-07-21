@@ -1,13 +1,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <math.h>
 
 
 #define BUFSZ 1024 * 1024
 
+static void print_matrix( int m, int n, double* a )
+{
+	int i, j;
+	for( i = 0; i < m; i++ ) {
+		for( j = 0; j < n; j++ ) {
+			printf( "%.2f", a[(size_t)j * m + i] );
+			if ( j != n - 1) {
+				printf("\t");
+			}
+		}
+		printf( "\n" );
+	}
+}
 
 // TODO transpose if matrix is not symmetric!
 int parse_buf(double** pL, char* buf, int size)
@@ -122,17 +137,33 @@ int mtx_column_sum(double *L, int n, double *d)
 	}
 }
 
-static void print_matrix( int m, int n, double* a )
+int mtx_power(double *L, int m, int n, double p)
+{
+	size_t i;
+	for( i = 0; i < (size_t)m * n; i++ ) {
+		L[i] = pow(L[i], p);
+	}
+}
+
+int mtx_mult_step2(double *L, double *d, int n)
 {
 	int i, j;
-	for( i = 0; i < m; i++ ) {
+
+	for( i = 0; i < n; i++ ) {
 		for( j = 0; j < n; j++ ) {
-			printf( "%.2f", a[(size_t)j * m + i] );
-			if ( j != n - 1) {
-				printf("\t");
-			}
+			L[(size_t)j * n + i] = L[(size_t)j * n + i] * d[j]* d[i];
 		}
-		printf( "\n" );
+	}
+}
+
+int mtx_mult_step3(double *L, double *d, int n)
+{
+	int i, j;
+
+	for( i = 0; i < n; i++ ) {
+		for( j = 0; j < n; j++ ) {
+			L[(size_t)j * n + i] = L[(size_t)j * n + i] * d[i];
+		}
 	}
 }
 
@@ -141,6 +172,7 @@ int main(int argc, char** argv)
 	char* infile;
 	int n;
 	double *L;
+	double alpha = 0.5;
 
 	if (argc < 2) {
 		fprintf(stderr, "error: usage\n");
@@ -153,10 +185,27 @@ int main(int argc, char** argv)
 	L = malloc(sizeof(double) * n * n);
 
 	read_csv( infile, L, n );
-	print_matrix(n, n, L);
-	printf("\n");
+	//print_matrix(n, n, L);
+	//printf("\n");
 
+	/* step 2 */
 	double *d = malloc(sizeof(double) * n);
 	mtx_column_sum(L, n, d);
-	print_matrix(1, n, d);
+	//print_matrix(1, n, d);
+	//printf("\n");
+
+	mtx_power(d, 1, n, -alpha);
+	//print_matrix(1, n, d);
+	//printf("\n");
+
+	mtx_mult_step2(L, d, n);
+	//print_matrix(n, n, L);
+	//printf("\n");
+
+	/* step 3 */
+	mtx_column_sum(L, n, d);
+	mtx_power(d, 1, n, -1);
+	mtx_mult_step3(L, d, n);
+	print_matrix(n, n, L);
+	printf("\n");
 }
