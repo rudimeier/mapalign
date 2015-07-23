@@ -31,7 +31,7 @@ outfile_result = "out-result-%%s-%08d.dat" % (n)
 #L = np.loadtxt(matrixfile)
 L = load_matrix(matrixfile, n)
 
-(embedding, result) = embed.compute_diffusion_map(L)
+(embedding, result) = embed.compute_diffusion_map(L, skip_checks=True, overwrite=True)
 np.savetxt(outfile_embedding, embedding, delimiter='\t', fmt='%.2f')
 for s in ("lambdas","vectors"):
     out = outfile_result % (s)
